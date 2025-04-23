@@ -24,6 +24,8 @@ class Crowdin {
   /// keeps app resource bundle for the last received distribution
   static AppResourceBundle? _arb;
 
+  static Map<String, Object>? _arbTemplateAttributes;
+
   @visibleForTesting
   static set arb(AppResourceBundle? value) {
     _arb = value;
@@ -68,11 +70,13 @@ class Crowdin {
     InternetConnectionType? connectionType,
     bool withRealTimeUpdates = false,
     CrowdinAuthConfig? authConfigurations,
+    Map<String, Object>? arbTemplateAttributes,
   }) async {
     await _storage.init();
 
-    _timestampCached = _storage.getTranslationTimestampFromStorage();
+    _arbTemplateAttributes = arbTemplateAttributes;
 
+    _timestampCached = _storage.getTranslationTimestampFromStorage();
     _distributionHash = distributionHash;
     CrowdinLogger.printLog('distributionHash $_distributionHash');
 
@@ -143,9 +147,9 @@ class Crowdin {
       // map locales to avoid problems with different language codes on Crowdin side and supported
       // by GlobalMaterialLocalizations class for some countries
       Locale mappedLocale =
-          _distributionsMap.keys.contains(locale.toLanguageTag())
-              ? locale
-              : CrowdinMapper.mapLocale(locale);
+      _distributionsMap.keys.contains(locale.toLanguageTag())
+          ? locale
+          : CrowdinMapper.mapLocale(locale);
 
       distribution = await _api.loadTranslations(
           path: _distributionsMap[mappedLocale.toLanguageTag()][0] as String,
@@ -154,7 +158,9 @@ class Crowdin {
       if (distribution != null) {
         /// todo remove when distribution file locale will be fixed
         distribution['@@locale'] = locale.toString();
-
+        if (_arbTemplateAttributes != null) {
+          distribution.addAll(_arbTemplateAttributes!);
+        }
         _storage.setDistributionToStorage(
           jsonEncode(distribution),
         );
@@ -194,10 +200,10 @@ class Crowdin {
 
   /// Returns translation for a given key and locale
   static String? getText(
-    String locale,
-    String key, [
-    Map<String, dynamic> args = const {},
-  ]) {
+      String locale,
+      String key, [
+        Map<String, dynamic> args = const {},
+      ]) {
     if (_arb != null) {
       try {
         return _extractor.getText(
@@ -233,7 +239,7 @@ Future<bool> _isConnectionTypeAllowed(
   //ignore: unnecessary_type_check
   final List<ConnectivityResult> connectionStatus = connectionResult is Iterable
       ? [...connectionResult as Iterable]
-      //ignore: unnecessary_cast
+  //ignore: unnecessary_cast
       : [connectionResult as ConnectivityResult];
 
   switch (connectionType) {

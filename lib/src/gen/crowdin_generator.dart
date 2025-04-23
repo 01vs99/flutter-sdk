@@ -31,15 +31,28 @@ class CrowdinGenerator {
 
   static List<String> getKeys(Map<String, Object?> arb) {
     List<String> keys =
-        arb.keys.where((element) => !element.startsWith('@')).toList();
+    arb.keys.where((element) => !element.startsWith('@')).toList();
+    return keys;
+  }
+
+  static List<String> getMetaKeys(Map<String, Object?> arb) {
+    List<String> keys = arb.keys
+        .where(
+            (element) => element.startsWith('@') && !element.startsWith('@@'))
+        .toList();
     return keys;
   }
 }
 
 String generationContent(
     {required List<String> keys,
-    required Map<String, Object?> arbResource,
-    required L10nConfig l10nConfig}) {
+      required Map<String, Object?> arbResource,
+      required L10nConfig l10nConfig}) {
+  var attributes = {};
+  for (var key in CrowdinGenerator.getMetaKeys(arbResource)) {
+    attributes[key] = arbResource[key];
+  }
+
   StringBuffer buffer = StringBuffer();
   buffer.writeln('''import 'dart:convert';
 
@@ -67,6 +80,8 @@ class CrowdinLocalization extends ${l10nConfig.outputClass} {
   ];
 
   static const List<Locale> supportedLocales = ${l10nConfig.outputClass}.supportedLocales;
+  
+  static Map<String,Object> get arbTemplateAttributes=> ${jsonEncode(attributes)};
  ''');
 
   var arb = AppResourceBundle(arbResource);
@@ -84,7 +99,7 @@ class CrowdinLocalization extends ${l10nConfig.outputClass} {
     } else {
       var params = generateMethodParameters(message).join(', ');
       var values =
-          placeholders.map((placeholder) => placeholder.name).join(', ');
+      placeholders.map((placeholder) => placeholder.name).join(', ');
       var args = placeholders
           .map((placeholder) => '\'${placeholder.name}\':${placeholder.name}')
           .join(', ');
@@ -119,7 +134,7 @@ class _CrowdinLocalizationsDelegate extends LocalizationsDelegate<${l10nConfig.o
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final pluralPlaceholder =
-      message.isPlural ? message.getCountPlaceholder() : null;
+  message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.values.map((Placeholder placeholder) {
     final type = placeholder.type == pluralPlaceholder?.type
         ? specifyPluralType(pluralPlaceholder?.type, Platform.version)
