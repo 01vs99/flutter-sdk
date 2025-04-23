@@ -121,9 +121,20 @@ class Crowdin {
   /// Load translations from Crowdin for a specific locale
   static Future<void> loadTranslations(Locale locale) async {
     Map<String, dynamic>? distribution;
+    //change first
+    _arb = null;
+    try {
+      distribution = _storage.getTranslationFromStorage(locale);
+      if (distribution != null) {
+        _arb = AppResourceBundle(distribution);
+        if (_withRealTimeUpdates) {
+          crowdinPreviewManager.setPreviewArb(
+              _arb!); // set default translations for real-time preview
+        }
+      }
+    } catch (_) {}
 
     if (!await _isConnectionTypeAllowed(_connectionType)) {
-      _arb = null;
       return; // return from function if connection type is forbidden for downloading translations
     }
 
@@ -133,19 +144,11 @@ class Crowdin {
       cachedTranslationTimestamp: _timestampCached,
     );
 
-    try {
-      if (!canUpdate) {
-        distribution = _storage.getTranslationFromStorage(locale);
-        if (distribution != null) {
-          _arb = AppResourceBundle(distribution);
-          if (_withRealTimeUpdates) {
-            crowdinPreviewManager.setPreviewArb(
-                _arb!); // set default translations for real-time preview
-          }
-          return;
-        }
-      }
+    if (!canUpdate) {
+      return;
+    }
 
+    try {
       // map locales to avoid problems with different language codes on Crowdin side and supported
       // by GlobalMaterialLocalizations class for some countries
       Locale mappedLocale =
