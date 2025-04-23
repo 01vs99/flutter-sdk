@@ -6,13 +6,13 @@ import 'dart:ui';
 class CrowdinMapper {
   static Locale mapLocale(Locale locale) {
     String localeTag = locale.toLanguageTag();
-    return _localesMap.containsKey(localeTag)
-        ? Locale(_localesMap[localeTag]!)
+    return localesMap.containsKey(localeTag)
+        ? Locale(localesMap[localeTag]!)
         : locale;
   }
 
   // _localesMap contains language codes that is different on Crowdin and supported by GlobalMaterialLocalizations class
-  static const Map<String, String> _localesMap = {
+  static const Map<String, String> localesMap = {
     'hy': 'hy-AM', // Armenian
     'zh': 'zh-CN', // Chinese Simplified
     'gu': 'gu-IN', // Gujarati
