@@ -5,18 +5,18 @@ import 'package:http/http.dart' as http;
 import 'crowdin_logger.dart';
 
 class CrowdinApi {
+  static String baseUrl = "https://distributions.crowdin.net";
+
   Future<Map<String, dynamic>?> loadTranslations({
     required String distributionHash,
     required String timeStamp,
     String? path,
   }) async {
     try {
-      var response = await http.get(
-        Uri.https('distributions.crowdin.net', '/$distributionHash$path',
-            {'timestamp': timeStamp}),
-      );
+      var response = await http.get(Uri.parse(
+          '${CrowdinApi.baseUrl}/$distributionHash?timestamp=$timeStamp'));
       Map<String, dynamic> responseDecoded =
-          jsonDecode(utf8.decode(response.bodyBytes));
+      jsonDecode(utf8.decode(response.bodyBytes));
       return responseDecoded;
     } catch (ex) {
       CrowdinLogger.printLog(
@@ -30,11 +30,10 @@ class CrowdinApi {
   }) async {
     try {
       var response = await http.get(
-        Uri.parse(
-            'https://distributions.crowdin.net/$distributionHash/manifest.json'),
+        Uri.parse('${CrowdinApi.baseUrl}/$distributionHash/manifest.json'),
       );
       Map<String, dynamic> responseDecoded =
-          jsonDecode(utf8.decode(response.bodyBytes));
+      jsonDecode(utf8.decode(response.bodyBytes));
       return responseDecoded;
     } catch (ex) {
       CrowdinLogger.printLog(
@@ -48,10 +47,10 @@ class CrowdinApi {
     required String mappingFilePath,
   }) async {
     try {
-      var response = await http.get(Uri.parse(
-          'https://distributions.crowdin.net/$distributionHash$mappingFilePath'));
+      var response = await http.get(
+          Uri.parse('${CrowdinApi.baseUrl}/$distributionHash$mappingFilePath'));
       Map<String, dynamic> responseDecoded =
-          jsonDecode(utf8.decode(response.bodyBytes));
+      jsonDecode(utf8.decode(response.bodyBytes));
       return responseDecoded;
     } catch (ex) {
       CrowdinLogger.printLog(
@@ -67,13 +66,13 @@ class CrowdinApi {
   }) async {
     try {
       String organizationDomain =
-          organizationName != null ? '$organizationName.' : '';
+      organizationName != null ? '$organizationName.' : '';
       var response = await http.get(
           Uri.parse(
               'https://${organizationDomain}api.crowdin.com/api/v2/distributions/metadata?hash=$distributionHash'),
           headers: {'Authorization': 'Bearer $accessToken'});
       Map<String, dynamic> responseDecoded =
-          jsonDecode(utf8.decode(response.bodyBytes));
+      jsonDecode(utf8.decode(response.bodyBytes));
       return responseDecoded;
     } catch (ex) {
       CrowdinLogger.printLog(
@@ -89,7 +88,7 @@ class CrowdinApi {
   }) async {
     try {
       String organizationDomain =
-          organizationName != null ? '$organizationName.' : '';
+      organizationName != null ? '$organizationName.' : '';
       var response = await http.post(
           Uri.parse(
               'https://${organizationDomain}api.crowdin.com/api/v2/user/websocket-ticket'),
@@ -102,7 +101,7 @@ class CrowdinApi {
             "context": {"mode": "translate"}
           }));
       Map<String, dynamic> responseDecoded =
-          jsonDecode(utf8.decode(response.bodyBytes));
+      jsonDecode(utf8.decode(response.bodyBytes));
       return responseDecoded['data']['ticket'];
     } catch (e) {
       CrowdinLogger.printLog(
