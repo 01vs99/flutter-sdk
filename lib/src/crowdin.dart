@@ -31,6 +31,8 @@ class Crowdin {
     _arb = value;
   }
 
+  static AppResourceBundle? get currentArb => _arb;
+
   static DateTime? _translationTimeToUpdate;
 
   /// contains certain distribution file paths for locales
