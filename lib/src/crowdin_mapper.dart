@@ -12,7 +12,7 @@ class CrowdinMapper {
   }
 
   // _localesMap contains language codes that is different on Crowdin and supported by GlobalMaterialLocalizations class
-  static const Map<String, String> localesMap = {
+  static  Map<String, String> localesMap = {
     'hy': 'hy-AM', // Armenian
     'zh': 'zh-CN', // Chinese Simplified
     'gu': 'gu-IN', // Gujarati
