@@ -14,7 +14,7 @@ class CrowdinApi {
   }) async {
     try {
       var response = await http.get(Uri.parse(
-          '${CrowdinApi.baseUrl}/$distributionHash?timestamp=$timeStamp'));
+          '${CrowdinApi.baseUrl}/$distributionHash$path?timestamp=$timeStamp'));
       Map<String, dynamic> responseDecoded =
       jsonDecode(utf8.decode(response.bodyBytes));
       return responseDecoded;
